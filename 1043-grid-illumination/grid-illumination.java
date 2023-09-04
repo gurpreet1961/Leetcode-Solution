@@ -1,79 +1,85 @@
 class Solution {
+    int[][] directions = {
+        // cur, direct horz & vertical & diagonals
+        {0, 0},
+        {1, 0}, {-1, 0}, {0, 1}, {0, -1},
+        {1, 1}, {1, -1}, {-1, -1}, {-1, 1}
+    };
+
+    Set<Integer> litLamps;
+    Map<Integer, Integer> rowLit;
+    Map<Integer, Integer> colLit;
+    Map<Integer, Integer> descendingDiagonalLit;
+    Map<Integer, Integer> ascendingDiagonalLit;
+    
+    // O(n^2) time | O(n^2) space
+    // n = board side length, worst case = all lamps lit and we iterate all lamps and add to set
     public int[] gridIllumination(int n, int[][] lamps, int[][] queries) {
-        HashMap<Integer, Integer> rows = new HashMap<>();
-        HashMap<Integer, Integer> cols = new HashMap<>();
-        HashMap<Integer, Integer> tLbR = new HashMap<>();
-        HashMap<Integer, Integer> bLtR = new HashMap<>();
+        litLamps = new HashSet<>();
+        rowLit = new HashMap<>();
+        colLit = new HashMap<>();
+        descendingDiagonalLit = new HashMap<>();
+        ascendingDiagonalLit = new HashMap<>();
+        
 
-        HashSet<Pair<Integer, Integer>> lampsLit = new HashSet<>();
-
-        for (int[] lamp : lamps) {
-            updateLitMatrix(n, lamp[0], lamp[1], rows, cols, tLbR, bLtR, true, lampsLit);
+        for (int[] pos : lamps) {
+            int r = pos[0], c = pos[1];
+            int posHash = r * n + c;
+            if (litLamps.contains(posHash)) continue; // manage duplicate inputs
+            litLamps.add(posHash);
+            light(pos[0], pos[1], n);
         }
 
         int[] res = new int[queries.length];
-        int i = 0;
+        for (int i = 0; i < queries.length; i++) {
+            int[] pos = queries[i];
 
-        for (int[] query : queries) {
-            int row = query[0];
-            int col = query[1];
-
-            if (rows.getOrDefault(row, 0) > 0 || cols.getOrDefault(col, 0) > 0 
-                || tLbR.getOrDefault(row + col, 0) > 0 || bLtR.getOrDefault(row - col, 0) > 0) {
+            if (isIlluminated(pos[0], pos[1], n)) {
                 res[i] = 1;
-            } else {
-                res[i] = 0;
-            }
-            i++;
 
-            updateLitMatrix(n, row - 1, col - 1, rows, cols, tLbR, bLtR, false, lampsLit);
-            updateLitMatrix(n, row - 1, col, rows, cols, tLbR, bLtR, false, lampsLit);
-            updateLitMatrix(n, row - 1, col + 1, rows, cols, tLbR, bLtR, false, lampsLit);
-
-            updateLitMatrix(n, row, col - 1, rows, cols, tLbR, bLtR, false, lampsLit);
-            updateLitMatrix(n, row, col, rows, cols, tLbR, bLtR, false, lampsLit);
-            updateLitMatrix(n, row, col + 1, rows, cols, tLbR, bLtR, false, lampsLit);
-
-            updateLitMatrix(n, row + 1, col - 1, rows, cols, tLbR, bLtR, false, lampsLit);
-            updateLitMatrix(n, row + 1, col, rows, cols, tLbR, bLtR, false, lampsLit);
-            updateLitMatrix(n, row + 1, col + 1, rows, cols, tLbR, bLtR, false, lampsLit);
+                for (int[] d : directions) {
+                    int r = pos[0] + d[0], c = pos[1] + d[1];
+                    if (r < 0 || r >= n || c < 0 || c >= n) continue;
+                    int posHash = r * n + c;
+                    
+                    if (litLamps.contains(posHash)) {
+                        lightOff(r, c, n);
+                        litLamps.remove(posHash);
+                    }
+                }
+            } 
+            else res[i] = 0;
         }
-
         return res;
     }
 
+    private void light(int r, int c, int n) {
+        int d_d = r - c;
+        int a_d = r + c;
 
-    public void updateLitMatrix(int n, int row, int col, HashMap<Integer, Integer> rows,
-                                HashMap<Integer, Integer> cols, 
-                                HashMap<Integer, Integer> tLbR, 
-                                HashMap<Integer, Integer> bLtR, boolean illuminate,
-                                HashSet<Pair<Integer, Integer>> lampsLit) {
-        if (row < 0 || row >= n || col < 0 || col >= n) {
-            return;
-        }
+        rowLit.put(r, rowLit.getOrDefault(r, 0) + 1);
+        colLit.put(c, colLit.getOrDefault(c, 0) + 1);
+        descendingDiagonalLit.put(a_d, descendingDiagonalLit.getOrDefault(a_d, 0) + 1);
+        ascendingDiagonalLit.put(d_d, ascendingDiagonalLit.getOrDefault(d_d, 0) + 1);
+    }
 
-        if (illuminate) {
-            if (lampsLit.contains(new Pair<Integer, Integer>(row, col))) {
-                return;
-            }
-            rows.put(row, rows.getOrDefault(row, 0) + 1);
-            cols.put(col, cols.getOrDefault(col, 0) + 1);
+    private boolean isIlluminated(int r, int c, int n) {
+        int d_d = r - c;
+        int a_d = r + c;
+        
+        return rowLit.getOrDefault(r, 0) > 0
+        || colLit.getOrDefault(c, 0) > 0 
+        || descendingDiagonalLit.getOrDefault(a_d, 0) > 0 
+        || ascendingDiagonalLit.getOrDefault(d_d, 0) > 0;
+    }
 
-            tLbR.put(row + col, tLbR.getOrDefault(row + col, 0) + 1);
-            bLtR.put(row - col, bLtR.getOrDefault(row - col, 0) + 1);
+    private void lightOff(int r, int c, int n) {
+        int d_d = r - c;
+        int a_d = r + c;
 
-            lampsLit.add(new Pair<Integer, Integer>(row, col));
-        } else {
-            if (!lampsLit.contains(new Pair<Integer, Integer>(row, col))) {
-                return;
-            }
-            rows.put(row, rows.get(row) - 1);
-            cols.put(col, cols.get(col) - 1);
-
-            tLbR.put(row + col, tLbR.get(row + col) - 1);
-            bLtR.put(row - col, bLtR.get(row - col) - 1);
-
-            lampsLit.remove(new Pair<Integer, Integer>(row, col));
-        }
+        rowLit.put(r, rowLit.get(r) - 1);
+        colLit.put(c, colLit.get(c) - 1);
+        descendingDiagonalLit.put(a_d, descendingDiagonalLit.get(a_d) - 1);
+        ascendingDiagonalLit.put(d_d, ascendingDiagonalLit.get(d_d) - 1);
     }
 }
