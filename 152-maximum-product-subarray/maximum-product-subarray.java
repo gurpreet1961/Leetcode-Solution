@@ -1,25 +1,28 @@
 class Solution {
     public int maxProduct(int[] nums) {
-        int preSum = 1;
-        int max = nums[0];
-        for(int i = 0 ; i < nums.length; i++){
-            preSum *= nums[i];
-            if(max<preSum){
-                max = preSum;
+        int prePro = 1;
+        int n = nums.length;
+        int max = Integer.MIN_VALUE;
+        for(int i = 0; i < n ; i++){
+            prePro *= nums[i];
+            if(prePro > max){
+                max = prePro;
+            } 
+            if(prePro == 0){
+                prePro = 1;
             }
-            if(preSum == 0){
-                preSum = 1;
-            }
+            
         }
-        int postSum = 1;
-        for(int i =  nums.length-1; i>=0; i--){
-            postSum *= nums[i];
-            if(max<postSum){
-                max = postSum;
+        int postPro = 1;
+        for(int i = n-1; i >=0 ; i--){
+            postPro *= nums[i];
+             if(postPro > max){
+                max = postPro;
+            } 
+            if(postPro == 0){
+                postPro = 1;
             }
-            if(postSum == 0){
-                postSum = 1;
-            }
+           
         }
         return max;
     }
