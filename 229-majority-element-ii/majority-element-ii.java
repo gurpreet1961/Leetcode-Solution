@@ -1,48 +1,49 @@
 class Solution {
     public List<Integer> majorityElement(int[] nums) {
-        int count1 = 0;
-        int count2 = 0;
-
         int ele1 = 0;
         int ele2 = 0;
 
-        int n = nums.length;
+        int count1 = 0;
+        int count2 = 0;
 
-        for(int i=0; i < n; i++){
-            if(count1 ==0 && nums[i] != ele2){
+        for(int i : nums){
+            if(count1 == 0 && i != ele2){
+                ele1 = i;
                 count1 = 1;
-                ele1 = nums[i];
             }
-            else if(count2 == 0&& nums[i] != ele1){
+            else if (count2 == 0 && i != ele1){
+                ele2 = i;
                 count2 = 1;
-                ele2 = nums[i];
             }
-            else if(ele1 == nums[i]){
+            else if(i == ele1){
                 count1++;
-            }else if(ele2 == nums[i]){
+            }else if(i==ele2){
                 count2++;
             }else{
                 count1--;
                 count2--;
             }
+
         }
-        ArrayList<Integer> ans = new ArrayList<>();
+        ArrayList<Integer> al = new ArrayList<>();
         count1 = 0;
-        count2= 0;
-        for(int  i: nums){
-            if(ele1 == i){
+        count2 = 0;
+
+        for(int i: nums){
+            if(i == ele1){
                 count1++;
-            }else if(ele2 ==i){
+            }
+            else if(i == ele2){
                 count2++;
             }
         }
-        int check = n/3;
+        int check = nums.length/3; 
         if(count1 > check){
-            ans.add(ele1);
+            al.add(ele1);
         }
         if(count2 > check){
-            ans.add(ele2);
+            al.add(ele2);
         }
-        return ans;
+        return al;
     }
 }
