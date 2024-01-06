@@ -1,15 +1,14 @@
 class Solution {
     public int maxChunksToSorted(int[] arr) {
-        int n = arr.length;
-        if(arr[n-1] ==0 || arr[0] == n-1){
+        int n= arr.length;
+        if(arr[0] == n-1 || arr[n-1] == 0){
             return 1;
         }
-
         int ans = 0;
         int max = arr[0];
-        for(int i = 0;i<n;i++){
-            max = Math.max(arr[i],max);
-            if(i == max){
+        for(int i = 0 ; i < arr.length; i++){
+            max = Math.max(max, arr[i]);
+            if(max == i){
                 ans++;
             }
         }
